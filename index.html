@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My IP Information</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #2c1a4d, #1a4d3c);
+            color: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: rgba(30, 30, 40, 0.85);
+            padding: 25px 35px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+        h2 {
+            margin-top: 0;
+            color: #ffffff;
+            text-align: center;
+            border-bottom: 1px solid #4a4a52;
+            padding-bottom: 15px;
+            font-weight: 700;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 110px 1fr;
+            gap: 15px;
+            font-size: 1.05em;
+            margin-top: 20px;
+        }
+        .label {
+            font-weight: 700;
+            color: #a0a8b4;
+            text-align: right;
+        }
+        .value {
+            word-wrap: break-word;
+            font-family: "Consolas", "Courier New", Courier, monospace;
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 6px 10px;
+            border-radius: 5px;
+        }
+        #loader {
+            text-align: center;
+            font-size: 1.2em;
+            padding: 40px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid #4a4a52;
+            font-size: 0.9em;
+            color: #a0a8b4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Your IP Information</h2>
+        <div id="loader">Loading...</div>
+        <div id="info-container" class="info-grid" style="display: none;">
+            <div class="label">IP Address</div><div id="ip" class="value"></div>
+            <div class="label">City</div><div id="city" class="value"></div>
+            <div class="label">Region</div><div id="region" class="value"></div>
+            <div class="label">Country</div><div id="country" class="value"></div>
+            <div class="label">ISP</div><div id="isp" class="value"></div>
+            <div class="label">ASN</div><div id="asn" class="value"></div>
+        </div>
+        <div class="footer" style="display: none;">
+            Created by MellStroy
+        </div>
+    </div>
+    <script>
+        if (window.Telegram && window.Telegram.WebApp) {
+            Telegram.WebApp.ready();
+        }
+
+        function getFlagEmoji(countryCode) {
+            if (!countryCode || countryCode.length !== 2) return '';
+            const codePoints = countryCode
+                .toUpperCase()
+                .split('')
+                .map(char => 127397 + char.charCodeAt());
+            return String.fromCodePoint(...codePoints);
+        }
+
+        fetch('https://ipapi.co/json/')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('info-container').style.display = 'grid';
+                document.querySelector('.footer').style.display = 'block';
+
+                const flag = getFlagEmoji(data.country_code);
+
+                document.getElementById('ip').textContent = data.ip || 'N/A';
+                document.getElementById('city').textContent = data.city || 'N/A';
+                document.getElementById('region').textContent = data.region || 'N/A';
+                document.getElementById('country').textContent = `${flag} ${data.country_name || 'N/A'}`;
+                document.getElementById('isp').textContent = data.org || 'N/A';
+                document.getElementById('asn').textContent = data.asn || 'N/A';
+            })
+            .catch(error => {
+                document.getElementById('loader').textContent = 'Could not fetch IP info.';
+                console.error('Error fetching IP info:', error);
+            });
+    </script>
+</body>
+</html>
